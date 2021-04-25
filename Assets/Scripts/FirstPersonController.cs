@@ -66,11 +66,11 @@ public class FirstPersonController : MonoBehaviour
         {
             movement.z = -1;
         }
-        if (Input.GetKey(KeyCode.E))
+        if (Input.GetKey(KeyCode.D))
         {
             movement.x = 1;
         }
-        if (Input.GetKey(KeyCode.Q))
+        if (Input.GetKey(KeyCode.A))
         {
             movement.x = -1;
         }
@@ -172,7 +172,7 @@ public class FirstPersonController : MonoBehaviour
     void Update()
     {
         ChangeWeapon();
-        HandleRotationManual();
+        //HandleRotationManual();
         HandleMovement();
 
         float curMoveSpeed = movement.z > 0 ? moveSpeed * movement.z : 0;
