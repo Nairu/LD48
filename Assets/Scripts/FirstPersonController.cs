@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FirstPersonController : MonoBehaviour
 {
@@ -22,11 +23,15 @@ public class FirstPersonController : MonoBehaviour
     private Hand rightHand;
 
     [SerializeField]
-    private Weapon currentWeapon;
+    private Weapon currentWeaponLeft;
     [SerializeField]
-    private Weapon[] weapons;
+    private Weapon currentWeaponRight;
     [SerializeField]
-    private int weaponIndex = 0;
+    private List<Weapon> weapons;
+    [SerializeField]
+    private int weaponIndexLeft = 0;
+    [SerializeField]
+    private int weaponIndexRight = 0;
     [SerializeField]
     private float maxHealth = 100f;
     private float currentHealth;
@@ -45,8 +50,8 @@ public class FirstPersonController : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        leftHand.SetWeapon(currentWeapon);
-        rightHand.SetWeapon(currentWeapon);
+        leftHand.SetWeapon(currentWeaponLeft);
+        rightHand.SetWeapon(currentWeaponRight);
         leftHand.SetHandTime(timer);
         rightHand.SetHandTime(timer);
         currentHealth = maxHealth;
@@ -123,39 +128,68 @@ public class FirstPersonController : MonoBehaviour
         transform.rotation = Quaternion.Euler(rot);
     }
 
-    void NextWeapon()
+    void NextWeaponLeft()
     {
-        weaponIndex++;
-        if (weaponIndex > weapons.Length-1)
+        weaponIndexLeft++;
+        if (weaponIndexLeft > weapons.Count-1)
         {
-            weaponIndex = 0;
+            weaponIndexLeft = 0;
         }
-        currentWeapon = weapons[weaponIndex];
+        currentWeaponLeft = weapons[weaponIndexLeft];
     }
 
-    void PreviousWeapon()
+    void NextWeaponRight()
     {
-        weaponIndex--;
-        if (weaponIndex < 0)
+        weaponIndexRight++;
+        if (weaponIndexRight > weapons.Count - 1)
         {
-            weaponIndex = weapons.Length - 1;
+            weaponIndexRight = 0;
         }
-        currentWeapon = weapons[weaponIndex];
+        currentWeaponRight = weapons[weaponIndexRight];
+    }
+
+    void PreviousWeaponLeft()
+    {
+        weaponIndexLeft--;
+        if (weaponIndexLeft < 0)
+        {
+            weaponIndexLeft = weapons.Count - 1;
+        }
+        currentWeaponLeft = weapons[weaponIndexLeft];
+    }
+
+    void PreviousWeaponRight()
+    {
+        weaponIndexRight--;
+        if (weaponIndexRight < 0)
+        {
+            weaponIndexRight = weapons.Count - 1;
+        }
+        currentWeaponRight = weapons[weaponIndexRight];
     }
 
     void ChangeWeapon()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            NextWeapon();
-            leftHand.SetWeapon(currentWeapon);
-            rightHand.SetWeapon(currentWeapon);
+            NextWeaponRight();
+            rightHand.SetWeapon(currentWeaponRight);
         }
-        else if (Input.GetKeyDown(KeyCode.F))
+        else if (Input.GetKeyDown(KeyCode.C))
         {
-            PreviousWeapon();
-            leftHand.SetWeapon(currentWeapon);
-            rightHand.SetWeapon(currentWeapon);
+            PreviousWeaponRight();
+            rightHand.SetWeapon(currentWeaponRight);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            NextWeaponLeft();
+            leftHand.SetWeapon(currentWeaponLeft);
+        }
+        else if (Input.GetKeyDown(KeyCode.Z))
+        {
+            PreviousWeaponLeft();
+            leftHand.SetWeapon(currentWeaponLeft);
         }
     }
 
@@ -166,7 +200,7 @@ public class FirstPersonController : MonoBehaviour
         RaycastHit info;
         Physics.Raycast(ray, out info);
         transformedPoint = info.point;
-        transformedPoint.y = leftHand.BulletSpawnPositionWorld().position.y;
+        //transformedPoint.y = leftHand.BulletSpawnPositionWorld().position.y;
     }
 
     void Update()
@@ -184,10 +218,21 @@ public class FirstPersonController : MonoBehaviour
         controller.Move(transform.TransformDirection(movement.normalized) * moveSpeed * Time.deltaTime);
         movement = Vector3.zero;
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (currentHealth <= 0)
         {
-            TakeDamage(Random.Range(10f, 50f));
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+    }
+
+    public void AddWeapon(Weapon weapon)
+    {
+        weapons.Add(weapon);
+        weaponIndexLeft = weapons.Count - 1;
+        weaponIndexRight = weapons.Count - 1;
+        currentWeaponLeft = weapon;
+        currentWeaponRight = weapon;
+        leftHand.SetWeapon(currentWeaponLeft);
+        rightHand.SetWeapon(currentWeaponRight);
     }
 
     public void TakeDamage(float damage)
